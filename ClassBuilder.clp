@@ -30,7 +30,6 @@
 ;-----------------------------------------------------------------------------
 (defclass ClassBuilder (is-a USER)
  (slot name (type SYMBOL) (default-dynamic nil))
- (slot has-been-built (type SYMBOL) (allowed-values FALSE TRUE))
  (slot comment (type STRING) (default-dynamic ""))
  (multislot is-a (type SYMBOL INSTANCE-NAME INSTANCE-ADDRESS))
  (multislot slots (type INSTANCE-NAME INSTANCE-ADDRESS) 
@@ -39,9 +38,30 @@
   (allowed-classes ClassMessageHandlerDocumentation))
  (slot role (type SYMBOL) (allowed-symbols concrete abstract))
  (slot pattern-match (type SYMBOL) (allowed-symbols reactive non-reactive))
- (message-handler build-type)
- (message-handler type-exists)
- (message-handler isa)
- (message-handler add-slot)
- (message-handler add-isa)
- (message-handler add-message-handler))
+ (message-handler build))
+
+(defmessage-handler ClassBuilder build ()
+  ; build the class
+  ; start with the is-a elements
+  (bind ?isa "(is-a ")
+  (bind ?slots "") 
+  (bind ?mhdoc "")
+  (if (= 0 (length$ ?self:is-a)) then
+   (bind ?isa "(is-a USER)")
+   else
+  (progn$ (?class ?self:is-a)
+   (if (not (send ?class get-has-been-built)) then (send ?class build))
+   (bind ?isa (format nil "%s %s" ?isa (send ?class get-name))))
+  (bind ?isa (format nil "%s)" ?isa)))
+  (progn$ (?slot ?self:slots)
+   (bind ?slots (format nil "%s %s" ?slots (send ?slot build))))
+  (progn$ (?mh ?self:handler-documentation)
+   (bind ?mhdoc (format nil "%s %s" ?mhdoc (send ?mh build))))
+  (bind ?buildString 
+   (format nil 
+    "(defclass %s %s %s (role %s) (pattern-match %s) %s %s)" 
+    ?self:name ?self:comment ?isa ?self:role ?self:pattern-match ?slots
+    ?mhdoc))
+  (build ?buildString)
+  (return ?buildString))
+
