@@ -29,6 +29,14 @@
 ; Written By Joshua Scoggins (10/15/2012)
 ;-----------------------------------------------------------------------------
 (defclass ClassMessageHandlerDocumentation (is-a USER)
- (slot name (type SYMBOL))
- (slot handler-type (type SYMBOL) (allowed-values NONE primary around before
-                                   after)))
+  (slot handler-name (type SYMBOL))
+  (slot handler-type (type SYMBOL) 
+        (allowed-values NONE primary around before after)))
+
+(defmessage-handler ClassMessageHandlerDocumentation build ()
+                    (return (format nil "(message-handler %s %s)"
+                                    ?self:handler-name 
+                                    (if (eq NONE ?self:handler-type) then 
+                                      "" 
+                                      else 
+                                      ?self:handler-type))))
