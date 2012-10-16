@@ -28,31 +28,41 @@
 ; Written By Joshua Scoggins (10/15/2012)
 ;-----------------------------------------------------------------------------
 (defclass ClassSlot (is-a USER)
- (slot name (type SYMBOL))
- (slot is-multislot (type SYMBOL) (allowed-values FALSE TRUE))
- (slot default-value)
- (slot default-dynamic-value)
- (multislot type (type SYMBOL) (allowed-values ANY SYMBOL STRING LEXEME INTEGER
-                           FLOAT NUMBER INSTANCE-NAME INSTANCE-ADDRESS INSTANCE
-                           EXTERNAL-ADDRESS FACT-ADDRESS))
- (multislot allowed-symbols (type SYMBOL))
- (multislot allowed-strings (type STRING))
- (multislot allowed-lexemes (type LEXEME))
- (multislot allowed-floats (type FLOAT))
- (multislot allowed-numbers (type NUMBER))
- (multislot allowed-instance-names (type INSTANCE-NAME))
- (multislot allowed-classes (type SYMBOL))
- (slot access (type SYMBOL) (allowed-symbols read-write read-only
-                             initialize-only))
- (slot storage (type SYMBOL) (allowed-symbols local shared))
- (slot propagation (type SYMBOL) (allowed-symbols inherit no-inherit))
- (slot source (type SYMBOL) (allowed-symbols exclusive composite))
- (slot pattern-match (type SYMBOL) (allowed-symbols reactive non-reactive))
- (slot visibility (type SYMBOL) (allowed-symbols private public))
- (slot create-accessor (type SYMBOL) (allowed-symbols NONE read write
-                                      read-write) (default-dynamic
-                                        read-write))
- (slot override-message (type SYMBOL) (default-dynamic DEFAULT))
- (message-handler build))
+  (slot slot-name (type SYMBOL))
+  (slot is-multislot (type SYMBOL) (allowed-values FALSE TRUE))
+  ;we store the default facet as an object because it makes it more flexible for
+  ;handling logic
+  ;we have the programmer define default how they want it
+  (slot default-facet (type STRING) (default-dynamic ""))
+  ;constraints are defined in the same way as well
+  (slot constraints (type STRING) (default-dynamic ""))
+  (slot access (type SYMBOL) (allowed-symbols read-write read-only initialize-only))
+  (slot storage (type SYMBOL) (allowed-symbols local shared))
+  (slot propagation (type SYMBOL) (allowed-symbols inherit no-inherit))
+  (slot source (type SYMBOL) (allowed-symbols exclusive composite))
+  (slot pattern-match (type SYMBOL) (allowed-symbols reactive non-reactive))
+  (slot visibility (type SYMBOL) (allowed-symbols private public))
+  (slot create-accessor (type STRING) (default-dynamic ""))
+  (slot override-message (type STRING) (default-dynamic ""))
+  (slot other (type STRING) (default-dynamic ""))
+  (message-handler build))
 
- 
+(defmessage-handler ClassSlot build ()
+                    (return 
+                     (format nil "(%s %s %s %s (access %s) (storage %s) (propagation %s) (source %s) (pattern-match %s) (visibility %s) %s %s %s)" 
+                                    (if ?self:is-multislot then "multislot"
+                                     else "slot")
+                                    ?self:slot-name 
+                                    ?self:constraints
+                                    ?self:default-facet
+                                    ?self:access 
+                                    ?self:storage
+                                    ?self:propagation 
+                                    ?self:source 
+                                    ?self:pattern-match
+                                    ?self:visibility 
+                                    ?self:create-accessor
+                                    ?self:override-message
+                                    ?self:other)))
+
+
