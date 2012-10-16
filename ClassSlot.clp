@@ -30,6 +30,9 @@
 (defclass ClassSlot (is-a USER)
   (slot slot-name (type SYMBOL))
   (slot is-multislot (type SYMBOL) (allowed-values FALSE TRUE))
+  (slot type (type SYMBOL) (allowed-values VARIABLE INTEGER NUMBER FLOAT LEXEME
+                            SYMBOL STRING INSTANCE INSTANCE-ADDRESS
+                            INSTANCE-NAME EXTERNAL-ADDRESS FACT-ADDRESS))
   ;we store the default facet as an object because it makes it more flexible for
   ;handling logic
   ;we have the programmer define default how they want it
@@ -49,10 +52,12 @@
 
 (defmessage-handler ClassSlot build ()
                     (return 
-                     (format nil "(%s %s %s %s (access %s) (storage %s) (propagation %s) (source %s) (pattern-match %s) (visibility %s) %s %s %s)" 
+                     (format nil "(%s %s (type %s) %s %s (access %s) (storage %s) (propagation %s) (source %s) (pattern-match %s) (visibility %s) %s %s %s)" 
                                     (if ?self:is-multislot then "multislot"
                                      else "slot")
                                     ?self:slot-name 
+                                    (if (eq VARIABLE ?self:type) then
+                                     "?VARIABLE" else ?self:type)
                                     ?self:constraints
                                     ?self:default-facet
                                     ?self:access 
