@@ -31,7 +31,7 @@
 (defclass ClassBuilder (is-a USER)
  (slot class-name (type SYMBOL) (default-dynamic nil))
  (slot comment (type STRING) (default-dynamic ""))
- (multislot isa (type SYMBOL INSTANCE) (allowed-classes ClassBuilder))
+ (multislot isa (type SYMBOL))
  (multislot slots (type INSTANCE) (allowed-classes ClassSlot))
  (multislot handler-documentation (type INSTANCE-NAME INSTANCE-ADDRESS)
   (allowed-classes ClassMessageHandlerDocumentation))
@@ -41,24 +41,22 @@
 
 (defmessage-handler ClassBuilder build ()
   ; build the class
+  ;TODO: Add functionality to ensure proper ordering on construction of classes
   ; start with the is-a elements
-  (bind ?isa "(is-a ")
+  (bind ?isa "")
   (bind ?slots "") 
   (bind ?mhdoc "")
   (if (= 0 (length$ ?self:isa)) then
    (bind ?isa "(is-a USER)")
    else
-  (progn$ (?class ?self:isa)
-   (if (not (send ?class get-has-been-built)) then (send ?class build))
-   (bind ?isa (format nil "%s %s" ?isa (send ?class get-class-name))))
-  (bind ?isa (format nil "%s)" ?isa)))
+   (bind ?isa (format nil "(is-a %s)" (implode$ ?self:isa))))
   (progn$ (?slot ?self:slots)
    (bind ?slots (format nil "%s %s" ?slots (send ?slot build))))
   (progn$ (?mh ?self:handler-documentation)
    (bind ?mhdoc (format nil "%s %s" ?mhdoc (send ?mh build))))
   (bind ?buildString 
    (format nil 
-    "(defclass %s %s %s (role %s) (pattern-match %s) %s %s)" 
+    "(defclass %s \"%s\" %s (role %s) (pattern-match %s) %s %s)" 
     ?self:class-name ?self:comment ?isa ?self:role ?self:pattern-match ?slots
     ?mhdoc))
   (build ?buildString)
