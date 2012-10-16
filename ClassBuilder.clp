@@ -29,11 +29,10 @@
 ; Written By Joshua Scoggins (10/15/2012)
 ;-----------------------------------------------------------------------------
 (defclass ClassBuilder (is-a USER)
- (slot name (type SYMBOL) (default-dynamic nil))
+ (slot class-name (type SYMBOL) (default-dynamic nil))
  (slot comment (type STRING) (default-dynamic ""))
- (multislot is-a (type SYMBOL INSTANCE-NAME INSTANCE-ADDRESS))
- (multislot slots (type INSTANCE-NAME INSTANCE-ADDRESS) 
-                  (allowed-classes ClassSlot))
+ (multislot isa (type SYMBOL INSTANCE) (allowed-classes ClassBuilder))
+ (multislot slots (type INSTANCE) (allowed-classes ClassSlot))
  (multislot handler-documentation (type INSTANCE-NAME INSTANCE-ADDRESS)
   (allowed-classes ClassMessageHandlerDocumentation))
  (slot role (type SYMBOL) (allowed-symbols concrete abstract))
@@ -46,12 +45,12 @@
   (bind ?isa "(is-a ")
   (bind ?slots "") 
   (bind ?mhdoc "")
-  (if (= 0 (length$ ?self:is-a)) then
+  (if (= 0 (length$ ?self:isa)) then
    (bind ?isa "(is-a USER)")
    else
-  (progn$ (?class ?self:is-a)
+  (progn$ (?class ?self:isa)
    (if (not (send ?class get-has-been-built)) then (send ?class build))
-   (bind ?isa (format nil "%s %s" ?isa (send ?class get-name))))
+   (bind ?isa (format nil "%s %s" ?isa (send ?class get-class-name))))
   (bind ?isa (format nil "%s)" ?isa)))
   (progn$ (?slot ?self:slots)
    (bind ?slots (format nil "%s %s" ?slots (send ?slot build))))
@@ -60,7 +59,7 @@
   (bind ?buildString 
    (format nil 
     "(defclass %s %s %s (role %s) (pattern-match %s) %s %s)" 
-    ?self:name ?self:comment ?isa ?self:role ?self:pattern-match ?slots
+    ?self:class-name ?self:comment ?isa ?self:role ?self:pattern-match ?slots
     ?mhdoc))
   (build ?buildString)
   (return ?buildString))
