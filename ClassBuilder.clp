@@ -33,7 +33,7 @@
  (slot comment (type STRING) (default-dynamic ""))
  (multislot isa (type SYMBOL))
  (multislot slots (type INSTANCE) (allowed-classes ClassSlot))
- (multislot handler-documentation (type INSTANCE-NAME INSTANCE-ADDRESS)
+ (multislot handler-documentation (type INSTANCE)
   (allowed-classes ClassMessageHandlerDocumentation))
  (slot role (type SYMBOL) (allowed-symbols concrete abstract))
  (slot pattern-match (type SYMBOL) (allowed-symbols reactive non-reactive))
