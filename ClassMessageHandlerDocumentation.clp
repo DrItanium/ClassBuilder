@@ -37,6 +37,4 @@
                     (return (format nil "(message-handler %s %s)"
                                     ?self:handler-name 
                                     (if (eq NONE ?self:handler-type) then 
-                                      "" 
-                                      else 
-                                      ?self:handler-type))))
+                                      "" else ?self:handler-type))))
